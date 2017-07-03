@@ -27,6 +27,10 @@ namespace Microsoft.Azure.Mobile.iOS.Bindings
         [Export("wrapperSdkName")]
         string WrapperSdkName { get; }
 
+        // @property (readonly, nonatomic) NSString * wrapperRuntimeVersion;
+        [Export("wrapperRuntimeVersion")]
+        string WrapperRuntimeVersion { get; }
+
         // @property (readonly, nonatomic) NSString * liveUpdateReleaseLabel;
         [Export("liveUpdateReleaseLabel")]
         string LiveUpdateReleaseLabel { get; }
@@ -43,9 +47,9 @@ namespace Microsoft.Azure.Mobile.iOS.Bindings
         [Export("isEqual:")]
         bool IsEqual(MSWrapperSdk wrapperSdk);
 
-        // -(instancetype)initWithWrapperSdkVersion:(NSString *)wrapperSdkVersion wrapperSdkName:(NSString *)wrapperSdkName liveUpdateReleaseLabel:(NSString *)liveUpdateReleaseLabel liveUpdateDeploymentKey:(NSString *)liveUpdateDeploymentKey liveUpdatePackageHash:(NSString *)liveUpdatePackageHash;
-        [Export("initWithWrapperSdkVersion:wrapperSdkName:liveUpdateReleaseLabel:liveUpdateDeploymentKey:liveUpdatePackageHash:")]
-        IntPtr Constructor([NullAllowed] string wrapperSdkVersion, [NullAllowed] string wrapperSdkName, [NullAllowed] string liveUpdateReleaseLabel, [NullAllowed] string liveUpdateDeploymentKey, [NullAllowed] string liveUpdatePackageHash);
+        // initWithWrapperSdkVersion:(NSString *)wrapperSdkVersion wrapperSdkName:(NSString *)wrapperSdkName wrapperRuntimeVersion:(NSString*)wrapperRuntimeVersion liveUpdateReleaseLabel:(NSString*)liveUpdateReleaseLabel liveUpdateDeploymentKey:(NSString*)liveUpdateDeploymentKey liveUpdatePackageHash:(NSString*)liveUpdatePackageHash;
+        [Export("initWithWrapperSdkVersion:wrapperSdkName:wrapperRuntimeVersion:liveUpdateReleaseLabel:liveUpdateDeploymentKey:liveUpdatePackageHash:")]
+        IntPtr Constructor([NullAllowed] string wrapperSdkVersion, [NullAllowed] string wrapperSdkName, [NullAllowed] string wrapperRuntimeVersion, [NullAllowed] string liveUpdateReleaseLabel, [NullAllowed] string liveUpdateDeploymentKey, [NullAllowed] string liveUpdatePackageHash);
     }
 
     // @interface MSDevice : MSWrapperSdk
@@ -121,6 +125,31 @@ namespace Microsoft.Azure.Mobile.iOS.Bindings
         bool IsEqual(MSDevice device);
     }
 
+	// @interface MSCustomProperties : NSObject
+	[BaseType(typeof(NSObject))]
+    interface MSCustomProperties
+    {
+        // - (instancetype)setString:(NSString *)value forKey:(NSString *)key;
+        [Export("setString:forKey:")]
+        void Set(string value, string key);
+
+        // - (instancetype)setNumber:(NSNumber *)value forKey:(NSString *)key;
+        [Export("setNumber:forKey:")]
+        void Set(NSNumber value, string key);
+
+        // - (instancetype)setBool:(BOOL)value forKey:(NSString *)key;
+        [Export("setBool:forKey:")]
+        void Set(bool value, string key);
+
+        // - (instancetype)setDate:(NSDate *)value forKey:(NSString *)key;
+        [Export("setDate:forKey:")]
+        void Set(NSDate value, string key);
+
+        // - (instancetype)clearPropertyForKey:(NSString *)key;
+        [Export("clearPropertyForKey:")]
+        void Clear(string key);
+    }
+
     // @interface MSMobileCenter : NSObject
     [BaseType(typeof(NSObject))]
     interface MSMobileCenter
@@ -194,6 +223,11 @@ namespace Microsoft.Azure.Mobile.iOS.Bindings
         [Static]
         [Export("isDebuggerAttached")]
         bool IsDebuggerAttached();
+
+        // + (void)setCustomProperties:(MSCustomProperties *)customProperties;
+        [Static]
+        [Export("setCustomProperties:")]
+        void SetCustomProperties(MSCustomProperties properties);
     }
 
     // @protocol MSService <NSObject>

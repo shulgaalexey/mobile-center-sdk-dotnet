@@ -1,21 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using ObjCRuntime;
 
 namespace Microsoft.Azure.Mobile
 {
-    using iOSMobileCenter = Microsoft.Azure.Mobile.iOS.Bindings.MSMobileCenter;
     using iOSLogLevel = Microsoft.Azure.Mobile.iOS.Bindings.MSLogLevel;
+    using iOSMobileCenter = Microsoft.Azure.Mobile.iOS.Bindings.MSMobileCenter;
     using iOSWrapperSdk = Microsoft.Azure.Mobile.iOS.Bindings.MSWrapperSdk;
 
     /// <summary>
     /// SDK core used to initialize, start and control specific service.
     /// </summary>
-    public static partial class MobileCenter
+    public partial class MobileCenter
     {
         /* The key identifier for parsing app secrets */
-        private const string PlatformIdentifier = "ios";
+        const string PlatformIdentifier = "ios";
+
+        internal MobileCenter()
+        {
+        }
 
         /// <summary>
         /// This property controls the amount of logs emitted by the SDK.
@@ -79,9 +82,9 @@ namespace Microsoft.Azure.Mobile
         }
 
         /// <summary>
-        ///     Change the base URL (scheme + authority + port only) used to send logs.
+        /// Change the base URL (scheme + authority + port only) used to communicate with the backend.
         /// </summary>
-        /// <param name="logUrl">base log URL.</param>
+        /// <param name="logUrl">Base URL to use for server communication.</param>
         public static void SetLogUrl(string logUrl)
         {
             iOSMobileCenter.SetLogUrl(logUrl);
@@ -165,12 +168,25 @@ namespace Microsoft.Azure.Mobile
         /// </remarks>
         public static Guid? InstallId => Guid.Parse(iOSMobileCenter.InstallId().AsString());
 
-        private static Class[] GetServices(IEnumerable<Type> services)
+        static Class[] GetServices(IEnumerable<Type> services)
         {
-            return services.Select(service => GetClassForType(GetBindingType(service))).ToArray();
+            var classes = new List<Class>();
+            foreach (var t in services)
+            {
+                var bindingType = GetBindingType(t);
+                if (bindingType != null)
+                {
+                    var aClass = GetClassForType(bindingType);
+                    if (aClass != null)
+                    {
+                        classes.Add(aClass);
+                    }
+                }
+            }
+            return classes.ToArray();
         }
 
-        private static Class GetClassForType(Type type)
+        static Class GetClassForType(Type type)
         {
             IntPtr classHandle = Class.GetHandle(type);
             if (classHandle != IntPtr.Zero)
@@ -180,15 +196,20 @@ namespace Microsoft.Azure.Mobile
             return null;
         }
 
-        private static Type GetBindingType(Type type)
+        static Type GetBindingType(Type type)
         {
             return (Type)type.GetProperty("BindingType").GetValue(null, null);
         }
 
-        private static void SetWrapperSdk()
+        static void SetWrapperSdk()
         {
-            iOSWrapperSdk wrapperSdk = new iOSWrapperSdk(WrapperSdk.Version, WrapperSdk.Name, null, null, null);
+            iOSWrapperSdk wrapperSdk = new iOSWrapperSdk(WrapperSdk.Version, WrapperSdk.Name, Constants.Version, null, null, null);
             iOSMobileCenter.SetWrapperSdk(wrapperSdk);
+        }
+
+        static void PlatformSetCustomProperties(CustomProperties customProperties)
+        {
+            iOSMobileCenter.SetCustomProperties(customProperties.IOSCustomProperties);
         }
     }
 }

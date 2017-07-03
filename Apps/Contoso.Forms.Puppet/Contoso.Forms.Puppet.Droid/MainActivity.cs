@@ -1,15 +1,15 @@
 ﻿using Android.App;
 using Android.Content.PM;
 using Android.OS;
-using Microsoft.Azure.Mobile;
 using Com.Microsoft.Azure.Mobile.Analytics;
-using Com.Microsoft.Azure.Mobile.Analytics.Ingestion.Models;
 using Com.Microsoft.Azure.Mobile.Analytics.Channel;
 using Com.Microsoft.Azure.Mobile.Ingestion.Models;
+using Microsoft.Azure.Mobile;
+using Microsoft.Azure.Mobile.Push;
 
 namespace Contoso.Forms.Puppet.Droid
 {
-    [Activity(Label = "MCFPuppet", Icon = "@drawable/icon", Theme = "@style/MyTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
+    [Activity(Label = "MCFPuppet", Icon = "@drawable/icon", Theme = "@style/PuppetTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation, LaunchMode = LaunchMode.SingleTop)]
     public class MainActivity : Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
         protected override void OnCreate(Bundle savedInstanceState)
@@ -24,6 +24,12 @@ namespace Contoso.Forms.Puppet.Droid
             AndroidAnalytics.SetListener(new AndroidAnalyticsListener());
 
             LoadApplication(new App());
+        }
+
+        protected override void OnNewIntent(Android.Content.Intent intent)
+        {
+            base.OnNewIntent(intent);
+            Push.CheckLaunchedFromNotification(this, intent);
         }
     }
 
@@ -44,4 +50,5 @@ namespace Contoso.Forms.Puppet.Droid
             MobileCenterLog.Debug(App.LogTag, "Analytics listener OnBeforeSendingEventLog");
         }
     }
+
 }
